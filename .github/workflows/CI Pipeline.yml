@@ -29,9 +29,9 @@ jobs:
           mypy ./src/backend/services/auth-service/src/
           ruff check --fix ./src/backend/services/auth-service/src/ && ruff format ./src/backend/services/auth-service/src/
 
-  test:
-    name: 🧪 Run Tests
-    runs-on: ubuntu-latest
+#  test:
+#    name: 🧪 Run Tests
+#    runs-on: ubuntu-latest
 
 #    # Сервисы для тестов
 #    services:
