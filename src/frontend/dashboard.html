@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — SovaCE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .dashboard-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 0; border-bottom: 1px solid var(--border);
+      background: rgba(11,14,20,0.9); backdrop-filter: blur(8px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-muted); font-size: 0.95rem;
+    }
+    .user-badge span { color: var(--accent); font-weight: 600; }
+    .main-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: 80px 20px;
+    }
+    .main-content h1 { margin-bottom: 16px; color: var(--accent); }
+    .main-content p { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 24px; }
+    .inactive-btn { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+    .logout-btn {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); padding: 8px 16px; border-radius: var(--radius);
+      cursor: pointer; transition: all 0.2s; margin-left: 16px;
+    }
+    .logout-btn:hover { border-color: #ef4444; color: #ef4444; }
+  </style>
+</head>
+<body>
+  <header class="dashboard-header container">
+    <a href="index.html" class="logo">🦉 SovaCE</a>
+    <div style="display: flex; align-items: center;">
+      <div class="user-badge">👤 <span id="display-login">Загрузка...</span></div>
+      <button id="logout-btn" class="logout-btn">Выйти</button>
+    </div>
+  </header>
+
+  <main class="main-content container">
+    <h1>✅ Вы успешно вошли в аккаунт</h1>
+    <p>Добро пожаловать на биржу SovaCE. Раздел в разработке.</p>
+    <div style="display: flex; gap: 12px;">
+      <button id="balance-btn" class="btn">Баланс</button>
+      <div id="balance-display" style="margin-top: 20px; font-size: 1.5rem;"></div>
+      <script>
+      document.getElementById('balance-btn').addEventListener('click', async () => {
+        const display = document.getElementById('balance-display');
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/api/user/balances', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'  // 🔥 Обязательно: отправляет куку сессии
+          });
+
+          if (response.status === 401) {
+            const errorData = await response.json();
+            const errorMsg = errorData.detail || "Сессия истекла";
+            alert(`⚠️ ${errorMsg}`);
+            localStorage.removeItem('userLogin');
+            window.location.href = 'auth.html';
+            return;
+          }
+
+          const data = await response.json();
+
+          // 📦 Бэкенд возвращает список: [{balance, currency}, ...]
+          if (!Array.isArray(data) || data.length === 0) {
+            display.textContent = '💰 Баланс не найден';
+            return;
+          }
+
+          // 🎨 Формируем красивый вывод для всех балансов
+          const lines = data.map(item =>
+            `• ${item.amount} ${item.currency || 'UNIT'}`
+          );
+
+          display.innerHTML = `💰 Ваши балансы:<br>${lines.join('<br>')}`;
+
+        } catch (err) {
+          alert('❌ Ошибка загрузки баланса');
+        }
+      });
+      </script>
+      <button class="btn inactive-btn" disabled>Личный кабинет</button>
+    </div>
+  </main>
+
+  <script>
+    // 🔒 Простая защита: если логина нет в localStorage → кидаем на вход
+    const savedLogin = localStorage.getItem('userLogin');
+    if (!savedLogin) {
+      window.location.href = 'auth.html';
+    } else {
+      // Отображаем логин в шапке
+      document.getElementById('display-login').textContent = savedLogin;
+    }
+
+    // Кнопка выхода
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('userLogin');
+      window.location.href = 'auth.html';
+    });
+  </script>
+</body>
+</html>

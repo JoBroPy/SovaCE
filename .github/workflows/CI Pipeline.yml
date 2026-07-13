@@ -1,0 +1,30 @@
+name: CI Pipeline
+
+on: workflow_dispatch
+
+jobs:
+  Install-and-Run:
+    name: Lint Code
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+        run:  |
+          pip install --upgrade pip
+          pip install -r src/backend/services/auth-service/requirements.txt
+
+        - name: Check code style and typing (Mypy, Ruff)
+          run: |
+            mypy .
+            ruff check --fix . && ruff format .
+            
+          
+        

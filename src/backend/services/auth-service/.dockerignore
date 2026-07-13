@@ -1,0 +1,20 @@
+# Виртуальное окружение
+src/venv-auth-service/
+
+#миграции Alembic
+migrations/
+alembic.ini
+
+
+# Git и IDE
+.git/
+.idea/
+.vscode/
+*.swp
+
+# Кэш и сборки
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/

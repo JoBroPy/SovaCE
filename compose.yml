@@ -1,0 +1,64 @@
+name: general-app
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: db-postgres
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  auth-service:
+    build: ./src/backend/services/auth-service
+    image: auth-app:1.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./src/backend/services/auth-service/src/.env
+
+  frontend:
+    build: ./src/frontend
+    image: frontend-app:1.0.0
+    depends_on:
+      - postgres
+      - redis
+      - auth-service
+    ports:
+      - "5500:5500"
+
+# Конечно по-хорошему ещё можно написать сервис alembic, однако я сделал один том postgres_data, как только сделал
+# Я туда через алембик поднял там все таблицы, поэтому по сути он больше не нужен. Конечно по-хорошему, под алембик,
+# Нужно создавать отдельный том, но это всё заморочки, поэтому как говорится, и так сойдёёёёёёт...
+
+volumes:
+  postgres_data:
