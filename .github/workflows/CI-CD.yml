@@ -66,10 +66,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Create .env file
+        working-directory: src/backend/services/auth-service/src
+        run: |
+          cat > .env << 'EOF'
+          DATABASE_URL_ASYNC=${{ secrets.DATABASE_URL_ASYNC }}
+          REDIS_DATABASE_URL=${{ secrets.REDIS_DATABASE_URL }}
+          OAUTH_GOOGLE_CLIENT_ID=${{ secrets.OAUTH_GOOGLE_CLIENT_ID }}
+          OAUTH_GOOGLE_CLIENT_SECRET=${{ secrets.OAUTH_GOOGLE_CLIENT_SECRET }}
+          EOF
+
       - name: Run Docker Compose
-        env:
-          DATABASE_URL_ASYNC: ${{secrets.DATABASE_URL_ASYNC}}
-          REDIS_DATABASE_URL: ${{secrets.REDIS_DATABASE_URL}}
-          OAUTH_GOOGLE_CLIENT_ID: ${{secrets.OAUTH_GOOGLE_CLIENT_ID}}
-          OAUTH_GOOGLE_CLIENT_SECRET: ${{secrets.OAUTH_GOOGLE_CLIENT_SECRET}}
-        run: docker compose up
+        run: docker compose up --build
