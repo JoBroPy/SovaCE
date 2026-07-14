@@ -31,62 +31,28 @@ jobs:
 
   test:
     name: Run Tests
+
     needs: [lint]
+
     runs-on: ubuntu-latest
 
-#    # Сервисы для тестов
-#    services:
-#      postgres:
-#        image: postgres:16-alpine
-#        env:
-#          POSTGRES_USER: test
-#          POSTGRES_PASSWORD: test
-#          POSTGRES_DB: test_db
-#        ports:
-#          - 5432:5432
-#        options: >-
-#          --health-cmd "pg_isready -U test -d test_db"
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-#
-#      redis:
-#        image: redis:7-alpine
-#        ports:
-#          - 6379:6379
-#        options: >-
-#          --health-cmd "redis-cli ping"
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-#
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v6
-#
-#      - name: Set up Python
-#        uses: actions/setup-python@v6
-#        with:
-#          python-version: '3.12'
-#          cache: 'pip'
-#
-#      - name: Install dependencies
-#        run: |
-#          pip install --upgrade pip
-#          pip install -r src/backend/services/auth-service/requirements.txt
-#
-#      - name: Run tests
-#        env:
-#          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/test_db
-#          REDIS_URL: redis://localhost:6379
-#        run: |
-#          pytest auth-service/tests/ \
-#            -v \
-#            --cov=auth-service/src \
-#            --cov-report=xml \
-#            --cov-report=html \
-#            --cov-fail-under=80
-#
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r src/backend/services/auth-service/requirements.txt
+
+      - name: Run tests
+        run: pytest src/backend/services/auth-service/src/tests/
 #  # ===== BUILD DOCKER =====
 #  build:
 #    name: 🐳 Build Docker Image
