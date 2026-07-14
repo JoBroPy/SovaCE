@@ -52,6 +52,9 @@ jobs:
           pip install -r src/backend/services/auth-service/requirements.txt
 
       - name: Run tests
+        env:
+          DATABASE_URL_ASYNC: postgresql+asyncpg://test:test@localhost:5432/test_db
+          REDIS_DATABASE_URL: redis://localhost:6379
         run: pytest src/backend/services/auth-service/src/tests/
 #  # ===== BUILD DOCKER =====
 #  build:
